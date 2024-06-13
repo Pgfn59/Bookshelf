@@ -15,7 +15,7 @@ public class ShelfFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_shelf, container, false);
         view.findViewById(R.id.btn_add_book).setOnClickListener(v -> {
-            Navigation.findNavController(view).navigate(R.id.action_shelfFragment_to_addBookFragment);;
+            Navigation.findNavController(v).navigate(R.id.action_shelfFragment_to_addBookFragment);;
         });
         return view;
     }

@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.Bookshelf" parent="Base.Theme.Bookshelf" />
+    <style name="Theme.NavigationToolBar" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 </resources>
