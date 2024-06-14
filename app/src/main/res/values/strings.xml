@@ -1,6 +1,17 @@
 <resources>
     <string name="app_name">Bookshelf</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="btn_add_book">書籍登録</string>
+    <string name="photo">表紙画像</string>
+    <string name="btn_shelf">本棚</string>
+    <string name="btn_record">記録閲覧</string>
+    <string name="btn_login">ログイン</string>
+    <string name="image">表紙画像を設定して下さい</string>
+    <string name="text_title">題名</string>
+    <string name="text_author">著者名</string>
+    <string name="text_date">登録日</string>
+    <string name="text_rating">お気に入り度</string>
+    <string name="text_thought">感想</string>
+    <string name="btn_add">登録</string>
+    <!-- TODO: Remove or change this placeholder text -->
 </resources>
