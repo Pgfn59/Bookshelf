@@ -6,11 +6,40 @@
     android:layout_height="match_parent"
     tools:context=".ShelfFragment">
 
-    <Button
-        android:id="@+id/btn_add_book"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_add_book"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/btn_add_book"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:insetBottom="0dp"
+            android:text="@string/btn_add_book"
+            app:cornerRadius="0dp" />
+
+        <Button
+            android:id="@+id/btn_shelf"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:insetBottom="0dp"
+            android:text="@string/btn_shelf"
+            app:cornerRadius="0dp" />
+
+        <Button
+            android:id="@+id/btn_record"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:insetBottom="0dp"
+            android:text="@string/btn_record"
+            app:cornerRadius="0dp" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

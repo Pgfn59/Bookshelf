@@ -13,5 +13,6 @@
     <string name="text_rating">お気に入り度</string>
     <string name="text_thought">感想</string>
     <string name="btn_add">登録</string>
+    <string name="btn_shelf_edit">本棚編集</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>
