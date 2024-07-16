@@ -2,7 +2,9 @@ package com.example.bookshelf;
 
 import android.app.Activity;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,11 +16,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.util.MalformedJsonException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RatingBar;
+import android.widget.Toast;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -32,6 +39,7 @@ public class AddBookFragment extends Fragment {
     private ActivityResultLauncher<Intent> pickImageFromGalleryResult;
     private ActivityResultLauncher<Intent> takePictureResult;
     private EditText editTextDate;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,6 +53,7 @@ public class AddBookFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        //画像設定
         imageButton = view.findViewById(R.id.imageButton);
 
         pickImageFromGalleryResult = registerForActivityResult(
@@ -70,6 +79,31 @@ public class AddBookFragment extends Fragment {
         );
 
         imageButton.setOnClickListener(this::showImagePickerDialog);
+
+        //DB
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
+
+        EditText editTitle = getView().findViewById(R.id.editText);
+        EditText editAuthor = getView().findViewById(R.id.editText2);
+        CheckBox checkBox = getView().findViewById(R.id.checkBox);
+        EditText editDate = getView().findViewById(R.id.editTextDate);
+        RatingBar ratingBar = getView().findViewById(R.id.ratingBar);
+        EditText editThought = getView().findViewById(R.id.editText5);
+        Button buttonAdd = getView().findViewById(R.id.buttonAdd);
+
+        buttonAdd.setOnClickListener(v -> {
+            try (SQLiteDatabase db = dbHelper.getWritableDatabase()) {
+                ContentValues cv = new ContentValues();
+                cv.put("title", editTitle.getText().toString());
+                cv.put("author", editAuthor.getText().toString());
+                cv.put("date", editDate.getText().toString());
+                cv.put("yet", checkBox.isChecked() ? 1 : 0);
+                cv.put("rating", ratingBar.getRating());
+                cv.put("thought", editThought.getText().toString());
+                db.insert("books", null, cv);
+                Toast.makeText(getContext(), "データを追加しました", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void showImagePickerDialog(View view) {
@@ -108,5 +142,4 @@ public class AddBookFragment extends Fragment {
 
         datePicker.show(getParentFragmentManager(), "datePicker");
     }
-
 }

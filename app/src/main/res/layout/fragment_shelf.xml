@@ -29,7 +29,7 @@
             android:layout_height="65dp"
             android:layout_weight="1"
             android:insetBottom="0dp"
-            android:text="@string/btn_shelf"
+            android:text="@string/btn_shelf_edit"
             app:cornerRadius="0dp" />
 
         <Button
