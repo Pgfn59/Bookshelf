@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     static final private String DB_NAME = "books_database.db";
-    static final private int VERSION = 1;
+    static final private int VERSION = 2;
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, VERSION);
@@ -16,6 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE books ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "image TEXT,"
                 + "title TEXT,"
                 + "author TEXT,"
                 + "date TEXT,"
@@ -28,5 +29,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS books");
         onCreate(db);
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        if (!db.isReadOnly()) {
+            db.execSQL("PRAGMA foreign_keys=ON;");
+        }
     }
 }
