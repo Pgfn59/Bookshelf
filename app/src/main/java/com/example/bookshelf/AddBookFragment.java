@@ -3,8 +3,6 @@ package com.example.bookshelf;
 import android.app.Activity;
 
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -18,6 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.util.MalformedJsonException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,20 +30,15 @@ import android.widget.Toast;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.function.Consumer;
 
 public class AddBookFragment extends Fragment {
     private ImageButton imageButton;
     private ActivityResultLauncher<Intent> pickImageFromGalleryResult;
     private ActivityResultLauncher<Intent> takePictureResult;
     private EditText editTextDate;
-    private String imagePath;
-    private Consumer<Uri> handleImage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,7 +55,6 @@ public class AddBookFragment extends Fragment {
 
         //画像設定
         imageButton = view.findViewById(R.id.imageButton);
-        Consumer<Uri> handleImage = this::handleImageImpl;
 
         pickImageFromGalleryResult = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -69,7 +62,7 @@ public class AddBookFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
                         Uri imageUri = data != null ? data.getData() : null;
-                        handleImage.accept(imageUri);
+                        imageButton.setImageURI(imageUri);
                     }
                 }
         );
@@ -80,7 +73,6 @@ public class AddBookFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Bundle extras = result.getData().getExtras();
                         Bitmap imageBitmap = (Bitmap) extras.get("data");
-                        imagePath = saveImageToInternalStorage(imageBitmap);
                         imageButton.setImageBitmap(imageBitmap);
                     }
                 }
@@ -89,7 +81,7 @@ public class AddBookFragment extends Fragment {
         imageButton.setOnClickListener(this::showImagePickerDialog);
 
         //DB
-        DatabaseHelper dbHelper = new DatabaseHelper(this.getContext());
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
 
         EditText editTitle = getView().findViewById(R.id.editText);
         EditText editAuthor = getView().findViewById(R.id.editText2);
@@ -102,36 +94,18 @@ public class AddBookFragment extends Fragment {
         buttonAdd.setOnClickListener(v -> {
             try (SQLiteDatabase db = dbHelper.getWritableDatabase()) {
                 ContentValues cv = new ContentValues();
-                if (imagePath != null) {
-                    cv.put("image", imagePath);
-                }
                 cv.put("title", editTitle.getText().toString());
                 cv.put("author", editAuthor.getText().toString());
                 cv.put("date", editDate.getText().toString());
                 cv.put("yet", checkBox.isChecked() ? 1 : 0);
                 cv.put("rating", ratingBar.getRating());
                 cv.put("thought", editThought.getText().toString());
-                long newRowId = db.insert("books", null, cv);
-                if (newRowId != -1) {
-                    Toast.makeText(getContext(), "データを追加しました", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "データの追加に失敗しました", Toast.LENGTH_SHORT).show();
-                }
+                db.insert("books", null, cv);
+                Toast.makeText(getContext(), "データを追加しました", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void handleImageImpl(Uri imageUri) {
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), imageUri);
-            imagePath = saveImageToInternalStorage(bitmap);
-            imageButton.setImageBitmap(bitmap);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //画像選択
     public void showImagePickerDialog(View view) {
         CharSequence[] options = new CharSequence[]{"写真を撮る", "ギャラリーから画像を選ぶ", "キャンセル"};
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -148,32 +122,6 @@ public class AddBookFragment extends Fragment {
             }
         });
         builder.show();
-    }
-
-    //画像を内部ストレージ保存
-    private String saveImageToInternalStorage(Bitmap bitmap) {
-        ContextWrapper contextWrapper = new ContextWrapper(getContext());
-        File directory = contextWrapper.getDir("images", Context.MODE_PRIVATE);
-        String fileName = "image_" + System.currentTimeMillis() + ".jpg";
-        File filepath = new File(directory, fileName);
-        FileOutputStream fos =null;
-        try {
-            fos = new FileOutputStream(filepath);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return filepath.getAbsolutePath();
     }
 
     //日付選択
