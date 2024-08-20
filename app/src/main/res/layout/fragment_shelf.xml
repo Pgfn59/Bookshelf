@@ -6,7 +6,44 @@
     android:layout_height="match_parent"
     tools:context=".ShelfFragment">
 
+    <!--本棚-->
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="664dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/ButtonLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/ShelfLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ShelfLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ShelfLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--ボタン-->
+    <LinearLayout
+        android:id="@+id/ButtonLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
