@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center_horizontal|center_vertical"
+    tools:context=".RecordFragment">
+
+    <Button
+        android:id="@+id/btn_profile"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/btn_profile"
+        android:textSize="20sp"
+        app:cornerRadius="0dp" />
+
+    <Button
+        android:id="@+id/btn_list_book"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/btn_list_book"
+        android:textSize="20sp"
+        app:cornerRadius="0dp"/>
+
+    <Button
+        android:id="@+id/btn_list_item"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/btn_list_item"
+        android:textSize="20sp"
+        app:cornerRadius="0dp"/>
+
+    <Button
+        android:id="@+id/btn_calendar"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:text="@string/btn_calendar"
+        android:textSize="20sp"
+        app:cornerRadius="0dp" />
+
+</LinearLayout>

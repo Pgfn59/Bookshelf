@@ -13,10 +13,18 @@
         <action
             android:id="@+id/action_shelfFragment_to_addBookFragment"
             app:destination="@id/addBookFragment" />
+        <action
+            android:id="@+id/action_shelfFragment_to_recordFragment"
+            app:destination="@id/recordFragment" />
     </fragment>
     <fragment
         android:id="@+id/addBookFragment"
         android:name="com.example.bookshelf.AddBookFragment"
         android:label="書籍登録"
         tools:layout="@layout/fragment_add_book" />
+    <fragment
+        android:id="@+id/recordFragment"
+        android:name="com.example.bookshelf.RecordFragment"
+        android:label="記録一覧"
+        tools:layout="@layout/fragment_record" />
 </navigation>

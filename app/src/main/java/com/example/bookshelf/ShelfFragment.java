@@ -26,10 +26,14 @@ public class ShelfFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //画面遷移
+        //画面遷移　書籍登録
         View view = inflater.inflate(R.layout.fragment_shelf, container, false);
         view.findViewById(R.id.btn_add_book).setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.action_shelfFragment_to_addBookFragment);;
+        });
+        //画面遷移　記録一覧
+        view.findViewById(R.id.btn_record).setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_shelfFragment_to_recordFragment);
         });
         return view;
     }

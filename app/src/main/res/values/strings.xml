@@ -16,4 +16,9 @@
     <string name="btn_shelf_edit">本棚編集</string>
     <string name="text_yet">読み途中</string>
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="btn_profile">プロフィール</string>
+    <string name="btn_list_book">登録書籍一覧</string>
+    <string name="btn_list_item">小物一覧</string>
+    <string name="btn_calendar">カレンダー</string>
+    <!-- TODO: Remove or change this placeholder text -->
 </resources>
