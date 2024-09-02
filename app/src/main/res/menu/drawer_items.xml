@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/group1">
+
+        <item
+            android:id="@+id/shelf"
+            android:title="@string/btn_shelf"
+            android:icon="@drawable/book_shelf" />
+
+        <item
+            android:id="@+id/add_book"
+            android:title="@string/btn_add_book"
+            android:icon="@drawable/add" />
+
+    </group>
+
+    <group
+        android:id="@+id/group2">
+
+        <item
+            android:id="@+id/list_book"
+            android:title="@string/btn_list_book"
+            android:icon="@drawable/list_book" />
+
+        <item
+            android:id="@+id/list_item"
+            android:title="@string/btn_list_item"
+            android:icon="@drawable/list_item" />
+
+    </group>
+
+    <group
+        android:id="@+id/group3">
+
+        <item
+            android:id="@+id/calendar"
+            android:title="@string/btn_calendar"
+            android:icon="@drawable/calender" />
+
+    </group>
+
+</menu>
