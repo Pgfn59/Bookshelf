@@ -17,7 +17,13 @@
             android:background="@android:color/transparent"
             android:padding="5dp" />
 
-    </Toolbar>
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/btn_add_book"/>
 
+    </Toolbar>
 
 </LinearLayout>
