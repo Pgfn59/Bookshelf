@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,20 +101,47 @@ public class AddBookFragment extends Fragment {
         Button buttonAdd = getView().findViewById(R.id.buttonAdd);
 
         buttonAdd.setOnClickListener(v -> {
+            String title = editTitle.getText().toString();
+            String author = editAuthor.getText().toString();
+            String date = editDate.getText().toString();
+
+            if (TextUtils.isEmpty(title)) {
+                Toast.makeText(getContext(), "タイトルを入力してください", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (TextUtils.isEmpty(author)) {
+                Toast.makeText(getContext(), "著者を入力してください", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (TextUtils.isEmpty(date)) {
+                Toast.makeText(getContext(), "日付を入力してください", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             try (SQLiteDatabase db = dbHelper.getWritableDatabase()) {
                 ContentValues cv = new ContentValues();
                 if (imagePath != null) {
                     cv.put("image", imagePath);
                 }
-                cv.put("title", editTitle.getText().toString());
-                cv.put("author", editAuthor.getText().toString());
-                cv.put("date", editDate.getText().toString());
+                cv.put("title", title);
+                cv.put("author", author);
+                cv.put("date", date);
                 cv.put("yet", checkBox.isChecked() ? 1 : 0);
                 cv.put("rating", ratingBar.getRating());
                 cv.put("thought", editThought.getText().toString());
                 long newRowId = db.insert("books", null, cv);
                 if (newRowId != -1) {
                     Toast.makeText(getContext(), "データを追加しました", Toast.LENGTH_SHORT).show();
+                    editTitle.setText("");
+                    editAuthor.setText("");
+                    editDate.setText("");
+                    checkBox.setChecked(false);
+                    ratingBar.setRating(0);
+                    editThought.setText("");
+                    if (imagePath != null) {
+                        imageButton.setImageResource(android.R.drawable.ic_menu_gallery);
+                        imagePath = null;
+                    }
                 } else {
                     Toast.makeText(getContext(), "データの追加に失敗しました", Toast.LENGTH_SHORT).show();
                 }
