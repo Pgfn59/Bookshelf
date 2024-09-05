@@ -15,7 +15,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
     private final ArrayList<String> dayOfMonth;
     private final OnItemListener onItemListener;
     private final List<LocalDate> registeredDates;
-    private LocalDate selectedDates;
+    private final LocalDate selectedDates;
 
     public CalendarAdapter(ArrayList<String> dayOfMonth, List<LocalDate> registeredDates, LocalDate selectedDates, OnItemListener onItemListener) {
         this.dayOfMonth = dayOfMonth;

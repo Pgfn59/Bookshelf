@@ -57,7 +57,6 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
 
     private void setMonthView() {
         monthYearText.setText(monthYearFromDate(selectedDates));
-        ArrayList<String> daysInMonth = daysInMonthArray(selectedDates);
         List<LocalDate> registeredDates = getRegisteredDatesFromDatabase();
 
         CalendarAdapter calendarAdapter = new CalendarAdapter(daysInMonthArray(selectedDates), registeredDates, selectedDates, this);
