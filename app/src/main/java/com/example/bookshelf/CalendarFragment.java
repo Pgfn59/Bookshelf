@@ -1,5 +1,7 @@
 package com.example.bookshelf;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CalendarFragment extends Fragment implements CalendarAdapter.OnItemListener {
     private TextView monthYearText;
@@ -55,11 +58,35 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private void setMonthView() {
         monthYearText.setText(monthYearFromDate(selectedDates));
         ArrayList<String> daysInMonth = daysInMonthArray(selectedDates);
+        List<LocalDate> registeredDates = getRegisteredDatesFromDatabase();
 
-        CalendarAdapter calendarAdapter = new CalendarAdapter(daysInMonth, this);
+        CalendarAdapter calendarAdapter = new CalendarAdapter(daysInMonthArray(selectedDates), registeredDates, selectedDates, this);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 7);
         calendarRecyclerView.setLayoutManager(layoutManager);
         calendarRecyclerView.setAdapter(calendarAdapter);
+    }
+
+    private List<LocalDate> getRegisteredDatesFromDatabase() {
+        List<LocalDate> registeredDates = new ArrayList<>();
+        DatabaseHelper dbHelper = new DatabaseHelper(getContext());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String[] columns = {"date"};
+        Cursor cursor = db.query("books", columns, null, null, null, null, null);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        int dateColumnIndex = cursor.getColumnIndexOrThrow("date");
+        while (cursor.moveToNext()) {
+            String dateString = cursor.getString(dateColumnIndex);
+            if (!dateString.isEmpty()) {
+                LocalDate date = LocalDate.parse(dateString, formatter);
+                registeredDates.add(date);
+            }
+        }
+        cursor.close();
+        db.close();
+
+        return registeredDates;
     }
 
     private ArrayList<String> daysInMonthArray(LocalDate date) {
@@ -82,7 +109,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     }
 
     private String monthYearFromDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy'年' LLLL");
         return date.format(formatter);
     }
 

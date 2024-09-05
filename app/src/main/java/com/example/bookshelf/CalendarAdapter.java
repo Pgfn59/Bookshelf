@@ -7,15 +7,22 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
     private final ArrayList<String> dayOfMonth;
     private final OnItemListener onItemListener;
+    private final List<LocalDate> registeredDates;
+    private LocalDate selectedDates;
 
-    public CalendarAdapter(ArrayList<String> dayOfMonth, OnItemListener onItemListener) {
+    public CalendarAdapter(ArrayList<String> dayOfMonth, List<LocalDate> registeredDates, LocalDate selectedDates, OnItemListener onItemListener) {
         this.dayOfMonth = dayOfMonth;
         this.onItemListener = onItemListener;
+        this.registeredDates = registeredDates;
+        this.selectedDates = selectedDates;
+
     }
 
     @NonNull
@@ -30,7 +37,20 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
+        String dayText = dayOfMonth.get(position);
         holder.dayOfMonth.setText(dayOfMonth.get(position));
+
+        if (!dayText.isEmpty()) {
+            LocalDate currentDate = LocalDate.of(selectedDates.getYear(), selectedDates.getMonthValue(), Integer.parseInt(dayText));
+
+            if (registeredDates.contains(currentDate)) {
+                holder.markView.setVisibility(View.VISIBLE);
+            } else {
+                holder.markView.setVisibility(View.GONE);
+            }
+        } else {
+            holder.markView.setVisibility(View.GONE);
+        }
     }
 
     @Override
