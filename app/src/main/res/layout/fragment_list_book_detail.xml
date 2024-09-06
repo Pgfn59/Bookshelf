@@ -6,16 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".ListBookDetailFragment">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/bookDetailToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#673AB7"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="120dp"
         android:layout_height="160dp"
+        android:layout_margin="5dp"
         android:contentDescription="@string/image"
         android:src="@android:drawable/ic_menu_gallery"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/bookDetailToolbar" />
 
     <TextView
         android:id="@+id/textView"

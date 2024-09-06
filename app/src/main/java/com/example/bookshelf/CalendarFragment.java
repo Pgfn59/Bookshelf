@@ -132,10 +132,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
                 Bundle args = new Bundle();
                 args.putInt("BOOK_ID", selectedBook.id);
                 detailFragment.setArguments(args);
-                requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainerView, detailFragment)
-                        .addToBackStack(null)
-                        .commit();
+                detailFragment.show(getChildFragmentManager(), "CalendarBookDetailFragment");
             });
         }
     }

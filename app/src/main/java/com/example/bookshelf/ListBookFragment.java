@@ -22,8 +22,7 @@ public class ListBookFragment extends Fragment {
     private ListBookAdapter adapter;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_list_book, container, false);
     }
 
@@ -38,11 +37,7 @@ public class ListBookFragment extends Fragment {
             Bundle args = new Bundle();
             args.putInt("BOOK_ID", book.id);
             detailFragment.setArguments(args);
-
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainerView, detailFragment)
-                    .addToBackStack(null)
-                    .commit();
+            detailFragment.show(getChildFragmentManager(), "ListBookDetailFragment");
         });
         bookRecyclerView.setAdapter(adapter);
     }
