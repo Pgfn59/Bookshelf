@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -27,6 +26,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
     private LocalDate selectedDates;
+    private CalendarAdapter calendarAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         monthYearText.setText(monthYearFromDate(selectedDates));
         List<LocalDate> registeredDates = getRegisteredDatesFromDatabase();
 
-        CalendarAdapter calendarAdapter = new CalendarAdapter(daysInMonthArray(selectedDates), registeredDates, selectedDates, this);
+        calendarAdapter = new CalendarAdapter(daysInMonthArray(selectedDates), registeredDates, selectedDates, this);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 7);
         calendarRecyclerView.setLayoutManager(layoutManager);
         calendarRecyclerView.setAdapter(calendarAdapter);
@@ -114,9 +114,9 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
 
     @Override
     public void onItemClick(int position, String dayText) {
-        if (dayText.isEmpty()){
-            String message = "selected Date" + dayText + " " + monthYearFromDate(selectedDates);
-            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+        if (!dayText.isEmpty()){
+            selectedDates = LocalDate.of(selectedDates.getYear(), selectedDates.getMonth(), Integer.parseInt(dayText));
+            calendarAdapter.updateSelectedDate(selectedDates);
         }
     }
 }

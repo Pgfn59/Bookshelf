@@ -1,5 +1,6 @@
 package com.example.bookshelf;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
     private final ArrayList<String> dayOfMonth;
     private final OnItemListener onItemListener;
     private final List<LocalDate> registeredDates;
-    private final LocalDate selectedDates;
+    private LocalDate selectedDates;
 
     public CalendarAdapter(ArrayList<String> dayOfMonth, List<LocalDate> registeredDates, LocalDate selectedDates, OnItemListener onItemListener) {
         this.dayOfMonth = dayOfMonth;
@@ -35,6 +36,31 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
         return new CalendarViewHolder(view, onItemListener);
     }
 
+    public void updateSelectedDate(LocalDate newSelectedDate) {
+        LocalDate oldSelectedDate = this.selectedDates;
+        this.selectedDates = newSelectedDate;
+        int oldPosition = -1;
+        int newPosition = -1;
+        for (int i = 0; i < dayOfMonth.size(); i++) {
+            String dayText = dayOfMonth.get(i);
+            if (!dayText.isEmpty()) {
+                LocalDate date = LocalDate.of(newSelectedDate.getYear(), newSelectedDate.getMonthValue(), Integer.parseInt(dayText));
+                if (date.equals(oldSelectedDate)) {
+                    oldPosition = i;
+                }
+                if (date.equals(newSelectedDate)) {
+                    newPosition = i;
+                }
+            }
+        }
+        if (oldPosition != -1) {
+            notifyItemChanged(oldPosition);
+        }
+        if (newPosition != -1) {
+            notifyItemChanged(newPosition);
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
         String dayText = dayOfMonth.get(position);
@@ -48,8 +74,15 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarViewHolder> {
             } else {
                 holder.markView.setVisibility(View.GONE);
             }
+
+            if (currentDate.equals(this.selectedDates)) {
+                holder.calendarCell.setBackgroundColor(Color.LTGRAY);
+            } else {
+                holder.calendarCell.setBackgroundColor(Color.TRANSPARENT);
+            }
         } else {
             holder.markView.setVisibility(View.GONE);
+            holder.calendarCell.setBackgroundColor(Color.TRANSPARENT);
         }
     }
 
