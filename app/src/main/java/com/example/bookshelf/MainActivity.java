@@ -109,9 +109,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void replaceFragment(Fragment fragment) {
+        replaceFragment(fragment, null);
+    }
+
+    private void replaceFragment(Fragment fragment, Bundle args) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        if (args != null) {
+            int bookId = args.getInt("BOOK_ID", -1);
+            if (bookId != -1) {
+                CalendarBookDetailFragment detailFragment = new CalendarBookDetailFragment();
+                Bundle detailArgs = new Bundle();
+                detailArgs.putInt("BOOK_ID", bookId);
+                detailFragment.setArguments(detailArgs);
+                fragment = detailFragment;
+            }
+        }
         fragmentTransaction.replace(R.id.fragmentContainerView, fragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 

@@ -33,19 +33,16 @@ public class ListBookFragment extends Fragment {
         bookRecyclerView = view.findViewById(R.id.bookRecyclerView);
         bookRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         List<Book> bookList = getBooksFromDatabase();
-        adapter = new ListBookAdapter(bookList, new ListBookAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Book book) {
-                ListBookDetailFragment detailFragment = new ListBookDetailFragment();
-                Bundle args = new Bundle();
-                args.putInt("BOOK_ID", book.id);
-                detailFragment.setArguments(args);
+        adapter = new ListBookAdapter(bookList, book -> {
+            ListBookDetailFragment detailFragment = new ListBookDetailFragment();
+            Bundle args = new Bundle();
+            args.putInt("BOOK_ID", book.id);
+            detailFragment.setArguments(args);
 
-                requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainerView, detailFragment)
-                        .addToBackStack(null)
-                        .commit();
-            }
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainerView, detailFragment)
+                    .addToBackStack(null)
+                    .commit();
         });
         bookRecyclerView.setAdapter(adapter);
     }

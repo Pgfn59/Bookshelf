@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private RecyclerView calendarRecyclerView;
     private LocalDate selectedDates;
     private CalendarAdapter calendarAdapter;
+    private ListView calendarBookList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         monthYearText = view.findViewById(R.id.monthYearTextView);
         calendarRecyclerView = view.findViewById(R.id.calendarRecyclerView);
         selectedDates = LocalDate.now();
+        calendarBookList = view.findViewById(R.id.calendarBookList);
         setMonthView();
 
         Button previousButton = view.findViewById(R.id.previousMonthButton);
@@ -115,8 +118,64 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     @Override
     public void onItemClick(int position, String dayText) {
         if (!dayText.isEmpty()){
-            selectedDates = LocalDate.of(selectedDates.getYear(), selectedDates.getMonth(), Integer.parseInt(dayText));
+            LocalDate clickedDate = LocalDate.of(selectedDates.getYear(), selectedDates.getMonth(), Integer.parseInt(dayText));
+            selectedDates = clickedDate;
             calendarAdapter.updateSelectedDate(selectedDates);
+
+            List<Book> books = getBooksForDate(clickedDate);
+            CalendarBookAdapter bookAdapter = new CalendarBookAdapter(getContext(), books);
+            calendarBookList.setAdapter(bookAdapter);
+
+            calendarBookList.setOnItemClickListener((parent, view, position1, id) -> {
+                Book selectedBook = books.get(position1);
+                CalendarBookDetailFragment detailFragment = new CalendarBookDetailFragment();
+                Bundle args = new Bundle();
+                args.putInt("BOOK_ID", selectedBook.id);
+                detailFragment.setArguments(args);
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainerView, detailFragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
         }
+    }
+
+    private List<Book> getBooksForDate(LocalDate date) {
+        List<Book> bookList = new ArrayList<>();
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String dateString = date.format(formatter);
+
+        String[] columns = {"id", "image", "title", "author", "date", "yet", "rating", "thought"};
+        String selection = "date = ?";
+        String[] selectionArgs = {dateString};
+
+        try (Cursor cursor = db.query("books", columns, selection, selectionArgs, null, null, null)){
+            int idColumnIndex = cursor.getColumnIndexOrThrow("id");
+            int imageColumnIndex = cursor.getColumnIndexOrThrow("image");
+            int titleColumnIndex = cursor.getColumnIndexOrThrow("title");
+            int authorColumnIndex = cursor.getColumnIndexOrThrow("author");
+            int dateColumnIndex = cursor.getColumnIndexOrThrow("date");
+            int yetColumnIndex = cursor.getColumnIndexOrThrow("yet");
+            int ratingColumnIndex = cursor.getColumnIndexOrThrow("rating");
+            int thoughtColumnIndex = cursor.getColumnIndexOrThrow("thought");
+
+            while (cursor.moveToNext()) {
+                Book book = new Book();
+                book.id = cursor.getInt(idColumnIndex);
+                book.image = cursor.getString(imageColumnIndex);
+                book.title = cursor.getString(titleColumnIndex);
+                book.author = cursor.getString(authorColumnIndex);
+                book.date = cursor.getString(dateColumnIndex);
+                book.yet = cursor.getInt(yetColumnIndex);
+                book.rating = cursor.getFloat(ratingColumnIndex);
+                book.thought = cursor.getString(thoughtColumnIndex);
+                bookList.add(book);
+            }
+        } finally {
+            db.close();
+        }
+        return bookList;
     }
 }
