@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -45,7 +46,6 @@ public class AddBookFragment extends Fragment {
     private ActivityResultLauncher<Intent> takePictureResult;
     private EditText editTextDate;
     private String imagePath;
-    private Consumer<Uri> handleImage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +57,7 @@ public class AddBookFragment extends Fragment {
     }
 
     @Override //画像設定
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         //画像設定
@@ -138,6 +138,9 @@ public class AddBookFragment extends Fragment {
                     checkBox.setChecked(false);
                     ratingBar.setRating(0);
                     editThought.setText("");
+                    if (getActivity() != null){
+                        ((MainActivity) getActivity()).displayDuration();
+                    }
                     if (imagePath != null) {
                         imageButton.setImageResource(android.R.drawable.ic_menu_gallery);
                         imagePath = null;
@@ -211,13 +214,10 @@ public class AddBookFragment extends Fragment {
                 .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
                 .build();
 
-        datePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-            @Override
-            public void onPositiveButtonClick(Long selection) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
-                String dateString = dateFormat.format(new Date(selection));
-                editTextDate.setText(dateString);
-            }
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
+            String dateString = dateFormat.format(new Date(selection));
+            editTextDate.setText(dateString);
         });
 
         datePicker.show(getParentFragmentManager(), "datePicker");

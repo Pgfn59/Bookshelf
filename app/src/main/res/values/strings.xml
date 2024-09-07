@@ -20,12 +20,13 @@
     <string name="btn_list_book">登録書籍一覧</string>
     <string name="btn_list_item">小物一覧</string>
     <string name="btn_calendar">カレンダー</string>
-    <string name="user_name">ユーザー名</string>
-    <string name="duration">継続期間</string>
+    <string name="user_name">ユーザー名：</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="back">&lt;</string>
     <string name="forward">&gt;</string>
     <string name="btn_edit">編集</string>
+    <string name="duration">読了書籍数：</string>
+    <string name="edit_user_name">ユーザー名を入力</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

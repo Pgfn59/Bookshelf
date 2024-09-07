@@ -241,6 +241,9 @@ public class ListBookDetailFragment extends DialogFragment {
                 int count = db.update("books", cv, selection, selectionArgs);
                 if (count > 0) {
                     Toast.makeText(requireContext(), "保存しました", Toast.LENGTH_SHORT).show();
+                    if (getActivity() != null) {
+                        ((MainActivity) getActivity()).displayDuration();
+                    }
                     dismiss();
                 } else {
                     Toast.makeText(requireContext(), "保存に失敗しました", Toast.LENGTH_SHORT).show();

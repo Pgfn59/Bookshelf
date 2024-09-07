@@ -138,6 +138,7 @@
         android:ems="10"
         android:inputType="textMultiLine"
         android:scrollHorizontally="false"
+        android:maxLines="9"
         android:hint="@string/text_thought"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
