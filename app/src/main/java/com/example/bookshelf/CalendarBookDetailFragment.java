@@ -220,6 +220,9 @@ public class CalendarBookDetailFragment extends DialogFragment {
                     if (getActivity() != null) {
                         ((MainActivity) getActivity()).displayDuration();
                     }
+                    if (getActivity() instanceof UpdateList) {
+                        ((UpdateList) getActivity()).listUpdated();
+                    }
                     dismiss();
                 } else {
                     Toast.makeText(requireContext(), "保存に失敗しました", Toast.LENGTH_SHORT).show();

@@ -34,10 +34,13 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/white"
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/drawer_items"
         app:dividerInsetStart="25dp"
         app:dividerInsetEnd="25dp"
-        app:itemIconPadding="20dp"/>
+        app:itemIconPadding="20dp"
+        app:itemIconTint="@color/black"
+        app:itemTextColor="@color/black"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

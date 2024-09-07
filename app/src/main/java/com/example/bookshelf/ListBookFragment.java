@@ -20,6 +20,7 @@ public class ListBookFragment extends Fragment {
 
     private RecyclerView bookRecyclerView;
     private ListBookAdapter adapter;
+    private List<Book> bookList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,7 +32,7 @@ public class ListBookFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         bookRecyclerView = view.findViewById(R.id.bookRecyclerView);
         bookRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        List<Book> bookList = getBooksFromDatabase();
+        bookList = new ArrayList<>();
         adapter = new ListBookAdapter(bookList, book -> {
             ListBookDetailFragment detailFragment = new ListBookDetailFragment();
             Bundle args = new Bundle();
@@ -40,6 +41,7 @@ public class ListBookFragment extends Fragment {
             detailFragment.show(getChildFragmentManager(), "ListBookDetailFragment");
         });
         bookRecyclerView.setAdapter(adapter);
+        loadBookList();
     }
 
     private List<Book> getBooksFromDatabase() {
@@ -71,5 +73,9 @@ public class ListBookFragment extends Fragment {
             db.close();
         }
         return bookList;
+    }
+    public void loadBookList() {
+        bookList = getBooksFromDatabase();
+        adapter.updateBookList(bookList);
     }
 }

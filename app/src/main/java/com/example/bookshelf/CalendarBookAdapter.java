@@ -32,4 +32,10 @@ public class CalendarBookAdapter extends ArrayAdapter<Book> {
 
         return convertView;
     }
+
+    public void updateBookList(List<Book> newBookList) {
+        clear();
+        addAll(newBookList);
+        notifyDataSetChanged();
+    }
 }

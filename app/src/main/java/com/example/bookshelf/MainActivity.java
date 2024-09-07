@@ -23,8 +23,9 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements UpdateList {
     private SharedPreferences sharedPreferences;
+    private Fragment currentFragment;
     DrawerLayout drawerLayout;
     ImageButton buttonDrawerToggle;
     NavigationView navigationView;
@@ -134,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.fragmentContainerView, fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+        currentFragment = fragment;
     }
 
     private void setToolbarTitle(String title) {
@@ -160,5 +162,14 @@ public class MainActivity extends AppCompatActivity {
 
         String durationText = "読了書籍数：" + finishedBookCount + "冊";
         textDuration.setText(durationText);
+    }
+
+    @Override
+    public void listUpdated() {
+       if (currentFragment instanceof ListBookFragment) {
+           ((ListBookFragment) currentFragment).loadBookList();
+       } else if (currentFragment instanceof CalendarFragment) {
+           ((CalendarFragment) currentFragment).loadBookList();
+       }
     }
 }

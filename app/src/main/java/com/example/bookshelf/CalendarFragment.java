@@ -29,6 +29,8 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private LocalDate selectedDates;
     private CalendarAdapter calendarAdapter;
     private ListView calendarBookList;
+    private List<Book> bookList;
+    private CalendarBookAdapter calendarBookAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,6 +45,9 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         selectedDates = LocalDate.now();
         calendarBookList = view.findViewById(R.id.calendarBookList);
         setMonthView();
+        bookList = new ArrayList<>();
+        calendarBookAdapter = new CalendarBookAdapter(getContext(), bookList);
+        calendarBookList.setAdapter(calendarBookAdapter);
 
         Button previousButton = view.findViewById(R.id.previousMonthButton);
         Button nextButton = view.findViewById(R.id.nextMonthButton);
@@ -56,6 +61,8 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
             selectedDates = selectedDates.plusMonths(1);
             setMonthView();
         });
+
+        loadBookList();
     }
 
     private void setMonthView() {
@@ -174,5 +181,11 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
             db.close();
         }
         return bookList;
+    }
+
+    public void loadBookList() {
+        bookList = getBooksForDate(selectedDates);
+        CalendarBookAdapter bookAdapter = new CalendarBookAdapter(getContext(), bookList);
+        calendarBookList.setAdapter(bookAdapter);
     }
 }

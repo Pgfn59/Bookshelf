@@ -154,6 +154,7 @@ public class ListBookDetailFragment extends DialogFragment {
             Book book = getBookFromDatabase(bookId);
             if (book != null) {
                 displayBookDetails(book);
+                imagePath = book.image;
             }
         }
 
@@ -243,6 +244,9 @@ public class ListBookDetailFragment extends DialogFragment {
                     Toast.makeText(requireContext(), "保存しました", Toast.LENGTH_SHORT).show();
                     if (getActivity() != null) {
                         ((MainActivity) getActivity()).displayDuration();
+                    }
+                    if (getActivity() instanceof UpdateList) {
+                        ((UpdateList) getActivity()).listUpdated();
                     }
                     dismiss();
                 } else {
