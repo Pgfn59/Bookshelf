@@ -9,6 +9,7 @@
         <item name="android:textColorPrimary">@color/grayBlack</item>
         <item name="android:textColorSecondary">@color/grayBlack</item>
         <item name="android:textColorHint">#8F8F8F</item>
+        <item name="android:listDivider">@color/lightGray</item>
     </style>
 
     <style name="Theme.NavigationToolBar" parent="Theme.MaterialComponents.DayNight.NoActionBar" />

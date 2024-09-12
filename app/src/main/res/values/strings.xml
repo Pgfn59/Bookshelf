@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bookshelf</string>
+    <string name="app_name">Collect</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="btn_add_book">書籍登録</string>
     <string name="photo">表紙画像</string>
