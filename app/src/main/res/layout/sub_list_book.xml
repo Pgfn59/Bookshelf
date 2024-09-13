@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/text_title"
-        android:textColor="#C8000000"
+        android:textColor="@color/grayBlack"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -19,6 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/text_author"
-        android:textColor="#C8000000"/>
+        android:textColor="@color/grayBlack"/>
 
 </LinearLayout>

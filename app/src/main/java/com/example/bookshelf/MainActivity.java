@@ -1,5 +1,6 @@
 package com.example.bookshelf;
 
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,18 +24,34 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity implements UpdateList {
     private SharedPreferences sharedPreferences;
     private Fragment currentFragment;
+    private int previousTotalFinishedBookCount = 0;
+    private int previousMonthFinishedBookCount = 0;
+    private int previousTotal = 0;
+    private DatabaseHelper dbHelper;
+    private SQLiteDatabase db;
+
     DrawerLayout drawerLayout;
     ImageButton buttonDrawerToggle;
     NavigationView navigationView;
     TextView toolbarTitle;
     TextView textDuration;
+    TextView textDurationMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
         setContentView(R.layout.activity_main);
         drawerLayout = findViewById(R.id.main);
         buttonDrawerToggle = findViewById(R.id.buttonDrawerToggle);
@@ -42,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         toolbarTitle = findViewById(R.id.toolbarTitle);
         View headerView = navigationView.getHeaderView(0);
         textDuration = headerView.findViewById(R.id.textDuration);
+        textDurationMonth = headerView.findViewById(R.id.textDurationMonth);
+        previousTotalFinishedBookCount = getFinishedBookCountTotal();
+        previousMonthFinishedBookCount = getFinishedBookCountMonth();
         EditText editUserName = headerView.findViewById(R.id.editUserName);
         sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String userName = sharedPreferences.getString("user_name", "");
@@ -114,6 +134,12 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         displayDuration();
     }
 
+    public void onDestroy() {
+        super.onDestroy();
+        db.close();
+        dbHelper.close();
+    }
+
     private void replaceFragment(Fragment fragment) {
         replaceFragment(fragment, null);
     }
@@ -148,20 +174,35 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
     }
 
     public void displayDuration() {
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        String query = "SELECT COUNT(*) FROM books WHERE yet = 0";
-        Cursor cursor = db.rawQuery(query, null);
-        int finishedBookCount = 0;
-        if (cursor.moveToFirst()) {
-            finishedBookCount = cursor.getInt(0);
+        String queryTotal = "SELECT COUNT(*) FROM books WHERE yet = 0";
+        Cursor cursorTotal = db.rawQuery(queryTotal, null);
+        int finishedBookCountTotal = 0;
+        if (cursorTotal.moveToFirst()) {
+            finishedBookCountTotal = cursorTotal.getInt(0);
         }
-        cursor.close();
-        db.close();
+        cursorTotal.close();
 
-        String durationText = "読了書籍数：" + finishedBookCount + "冊";
+        String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
+        String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
+        Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth});
+        int finishedBookCountMonth = 0;
+        if (cursorMonth.moveToFirst()) {
+            finishedBookCountMonth = cursorMonth.getInt(0);
+        }
+        cursorMonth.close();
+
+        int monthDiff = finishedBookCountMonth - previousMonthFinishedBookCount;
+        if (finishedBookCountTotal > previousTotalFinishedBookCount || monthDiff > 0) {
+            updateItemStatus(finishedBookCountTotal, monthDiff);
+        }
+
+        previousTotalFinishedBookCount = finishedBookCountTotal;
+        previousMonthFinishedBookCount = finishedBookCountMonth;
+
+        String durationText = "累積読了書籍数：" + finishedBookCountTotal + "冊";
+        String durationTextMonth = "当月読了書籍数：" + finishedBookCountMonth + "冊";
         textDuration.setText(durationText);
+        textDurationMonth.setText(durationTextMonth);
     }
 
     @Override
@@ -170,6 +211,60 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
            ((ListBookFragment) currentFragment).loadBookList();
        } else if (currentFragment instanceof CalendarFragment) {
            ((CalendarFragment) currentFragment).loadBookList();
+       } else if (currentFragment instanceof ListItemFragment) {
+           ((ListItemFragment) currentFragment).loadItemList();
        }
+    }
+
+    private void updateItemStatus(int total, int monthDiff) {
+        List<Integer> acquiredItemIds = new ArrayList<>();
+        boolean isTotalUpdated = total >= 5 && total % 5 == 0 && previousTotal < total;
+        boolean isMonthUpdated = monthDiff >= 1;
+
+        if (isTotalUpdated || isMonthUpdated) {
+            try (Cursor cursor = db.query("items", new String[]{"id"}, "get = 0", null, null, null, "RANDOM()")) {
+                List<Integer> unacquiredItems = new ArrayList<>();
+                while (cursor.moveToNext()) {
+                    unacquiredItems.add(cursor.getInt(0));
+                }
+
+                int updatedCount = (isTotalUpdated ? 1 : 0) + (isMonthUpdated ? 1 : 0);
+                for (int i = 0; i < updatedCount && !unacquiredItems.isEmpty(); i++) {
+                    int randomIndex = new Random().nextInt(unacquiredItems.size());
+                    int itemId = unacquiredItems.remove(randomIndex);
+                    acquiredItemIds.add(itemId);
+                    ContentValues values = new ContentValues();
+                    values.put("get", 1);
+                    db.update("items", values, "id = ?", new String[]{String.valueOf(itemId)});
+                }
+            }
+        }
+        if (currentFragment instanceof ListItemFragment) {
+            ((ListItemFragment) currentFragment).loadItemList();
+        }
+        previousTotal = total;
+    }
+
+    private int getFinishedBookCountTotal() {
+        String queryTotal = "SELECT COUNT(*) FROM books WHERE yet = 0";
+        Cursor cursorTotal = db.rawQuery(queryTotal, null);
+        int finishedBookCountTotal = 0;
+        if (cursorTotal.moveToFirst()) {
+            finishedBookCountTotal = cursorTotal.getInt(0);
+        }
+        cursorTotal.close();
+        return finishedBookCountTotal;
+    }
+
+    private int getFinishedBookCountMonth() {
+        String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
+        String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
+        Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth});
+        int finishedBookCountMonth = 0;
+        if (cursorMonth.moveToFirst()) {
+            finishedBookCountMonth = cursorMonth.getInt(0);
+        }
+        cursorMonth.close();
+        return finishedBookCountMonth;
     }
 }
