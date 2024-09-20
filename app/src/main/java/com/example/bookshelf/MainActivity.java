@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         });
         replaceFragment(new ShelfFragment());
         setToolbarTitle(getString(R.string.btn_shelf));
-        displayDuration();
     }
 
     public void onDestroy() {
@@ -207,13 +206,14 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
 
     @Override
     public void listUpdated() {
-       if (currentFragment instanceof ListBookFragment) {
-           ((ListBookFragment) currentFragment).loadBookList();
-       } else if (currentFragment instanceof CalendarFragment) {
-           ((CalendarFragment) currentFragment).loadBookList();
-       } else if (currentFragment instanceof ListItemFragment) {
-           ((ListItemFragment) currentFragment).loadItemList();
-       }
+        if (currentFragment instanceof ListBookFragment) {
+            ((ListBookFragment) currentFragment).loadBookList();
+        } else if (currentFragment instanceof CalendarFragment) {
+            ((CalendarFragment) currentFragment).loadBookList();
+        } else if (currentFragment instanceof ListItemFragment) {
+            ((ListItemFragment) currentFragment).loadItemList();
+        }
+        displayDuration();
     }
 
     private void updateItemStatus(int total, int monthDiff) {
