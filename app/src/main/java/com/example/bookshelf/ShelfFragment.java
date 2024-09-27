@@ -14,11 +14,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+
+import java.util.Calendar;
 
 public class ShelfFragment extends Fragment {
     private LinearLayout bookshelfRow1;
@@ -44,12 +47,23 @@ public class ShelfFragment extends Fragment {
         bookshelfRow3.setGravity(Gravity.BOTTOM);
         dbHelper = new DatabaseHelper(requireContext());
         bookshelfRow1.post(this::loadBooksFromDatabase);
+        bookshelfRow1.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                bookshelfRow1.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                loadBooksFromDatabase();
+            }
+        });
     }
 
     private void loadBooksFromDatabase() {
         clearBookshelves();
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+
         try (SQLiteDatabase db = dbHelper.getReadableDatabase()) {
-            String query = "SELECT * FROM books";
+            String query = "SELECT * FROM books WHERE date LIKE '" + year + "/" + String.format("%02d", month) + "/%' ORDER BY date";
             try (Cursor cursor = db.rawQuery(query,null)){
                 while (cursor.moveToNext()){
                     String imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image"));
@@ -99,16 +113,26 @@ public class ShelfFragment extends Fragment {
     }
 
     private void addToCurrentRow(ImageView bookView) {
-        int maxBooks = 5;
         LinearLayout[] bookshelfRows = {bookshelfRow1, bookshelfRow2, bookshelfRow3};
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+        bookView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int bookWidth = bookView.getMeasuredWidth();
 
-        int rowIndex = (currentRow - 1) % bookshelfRows.length;
-        LinearLayout row = bookshelfRows[rowIndex];
-        if (row.getChildCount() < maxBooks) {
-            row.addView(bookView);
-        } else {
-            currentRow++;
-            addToCurrentRow(bookView);
+        if (currentRow <= bookshelfRows.length) {
+            LinearLayout row = bookshelfRows[currentRow - 1];
+            int totalWidth = 0;
+            for (int i = 0; i < row.getChildCount(); i++) {
+                totalWidth += row.getChildAt(i).getMeasuredWidth();
+            }
+
+            if (totalWidth + bookWidth <= screenWidth) {
+                row.addView(bookView);
+            } else {
+                currentRow++;
+                addToCurrentRow(bookView);
+            }
         }
     }
 
