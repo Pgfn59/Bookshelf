@@ -12,6 +12,11 @@
             android:icon="@drawable/book_shelf" />
 
         <item
+            android:id="@+id/shelf_favorite"
+            android:title="@string/btn_favorite"
+            android:icon="@drawable/favorite" />
+
+        <item
             android:id="@+id/add_book"
             android:title="@string/btn_add_book"
             android:icon="@drawable/add" />

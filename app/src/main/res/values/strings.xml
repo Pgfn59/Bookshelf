@@ -31,5 +31,6 @@
     <string name="item_name">アイテム名</string>
     <string name="item_num">未入手</string>
     <string name="duration_month">当月読了書籍数：</string>
+    <string name="btn_favorite">お気に入り</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

@@ -92,6 +92,9 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
             if (itemId == R.id.shelf) {
                 fragment = new ShelfFragment();
                 titleResId = R.string.btn_shelf;
+            }else if (itemId == R.id.shelf_favorite) {
+                fragment = new ShelfFavoriteFragment();
+                titleResId = R.string.btn_favorite;
             }else if (itemId == R.id.add_book) {
                 fragment = new AddBookFragment();
                 titleResId = R.string.btn_add_book;
