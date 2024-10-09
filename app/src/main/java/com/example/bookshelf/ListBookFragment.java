@@ -36,7 +36,7 @@ public class ListBookFragment extends Fragment {
         adapter = new ListBookAdapter(bookList, book -> {
             ListBookDetailFragment detailFragment = new ListBookDetailFragment();
             Bundle args = new Bundle();
-            args.putInt("BOOK_ID", book.id);
+            args.putInt("BOOK_ID", book.getId());
             detailFragment.setArguments(args);
             detailFragment.show(getChildFragmentManager(), "ListBookDetailFragment");
         });
@@ -47,30 +47,22 @@ public class ListBookFragment extends Fragment {
     private List<Book> getBooksFromDatabase() {
         List<Book> bookList = new ArrayList<>();
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
 
-        try {
-            String[] columns = {"id", "image", "title", "author", "date", "yet", "rating", "thought"};
-            cursor = db.query("books", columns, null, null, null, null, null);
-
+        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
+             Cursor cursor = db.query("books", new String[]{"id", "image", "title", "author", "date", "yet", "rating", "thought"}, null, null, null, null, null)) {
             while (cursor.moveToNext()) {
-                Book book = new Book();
-                book.id = cursor.getInt(0);
-                book.image = cursor.getString(1);
-                book.title = cursor.getString(2);
-                book.author = cursor.getString(3);
-                book.date = cursor.getString(4);
-                book.yet = cursor.getInt(5);
-                book.rating = cursor.getFloat(6);
-                book.thought = cursor.getString(7);
+                Book book = new Book(
+                        cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("image")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("title")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("author")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("date")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("yet")),
+                        cursor.getFloat(cursor.getColumnIndexOrThrow("rating")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("thought"))
+                );
                 bookList.add(book);
             }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
         }
         return bookList;
     }

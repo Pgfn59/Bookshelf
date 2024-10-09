@@ -81,8 +81,7 @@ public class ShelfFragment extends Fragment {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
-        int numBooksInRow = 3; //冊数
-        int bookWidth = screenWidth / numBooksInRow;
+        int bookWidth = screenWidth / 3;
         int bookHeight = bookWidth * 4 / 3;
 
         if (imagePath != null) {

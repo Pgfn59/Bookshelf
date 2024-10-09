@@ -154,7 +154,7 @@ public class ListBookDetailFragment extends DialogFragment {
             Book book = getBookFromDatabase(bookId);
             if (book != null) {
                 displayBookDetails(book);
-                imagePath = book.image;
+                imagePath = book.getImage();
             }
         }
 
@@ -173,44 +173,38 @@ public class ListBookDetailFragment extends DialogFragment {
     }
 
     private void displayBookDetails(Book book) {
-        if (book.image != null) {
-            Glide.with(requireContext()).load(book.image).placeholder(android.R.drawable.ic_menu_gallery).error(android.R.drawable.ic_menu_gallery).into(imageButton);
+        if (book.getImage() != null) {
+            Glide.with(requireContext()).load(book.getImage()).placeholder(android.R.drawable.ic_menu_gallery).error(android.R.drawable.ic_menu_gallery).into(imageButton);
         }
-        titleEditText.setText(book.title);
-        authorEditText.setText(book.author);
-        yetCheckBox.setChecked(book.yet == 1);
-        dateEditText.setText(book.date);
-        float ratingValue = book.rating != null ? book.rating : 0f;
+        titleEditText.setText(book.getTitle());
+        authorEditText.setText(book.getAuthor());
+        yetCheckBox.setChecked(book.getYet() == 1);
+        dateEditText.setText(book.getDate());
+        float ratingValue = book.getRating() != null ? book.getRating() : 0f;
         ratingBar.setRating(ratingValue);
-        thoughtEditText.setText(book.thought);
+        thoughtEditText.setText(book.getThought());
     }
 
     private Book getBookFromDatabase(int bookId) {
         DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
-        Book book = null;
 
-        try {
-            cursor = db.query("books", null, "id = ?", new String[]{String.valueOf(bookId)}, null, null, null);
+        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
+             Cursor cursor = db.query("books", null, "id = ?", new String[]{String.valueOf(bookId)}, null, null, null)) {
             if (cursor.moveToFirst()) {
-                book = new Book();
-                book.id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-                book.image = cursor.getString(cursor.getColumnIndexOrThrow("image"));
-                book.title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
-                book.author = cursor.getString(cursor.getColumnIndexOrThrow("author"));
-                book.date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-                book.yet = cursor.getInt(cursor.getColumnIndexOrThrow("yet"));
-                book.rating = cursor.getFloat(cursor.getColumnIndexOrThrow("rating"));
-                book.thought = cursor.getString(cursor.getColumnIndexOrThrow("thought"));
+                Book book = new Book(
+                        cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("image")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("title")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("author")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("date")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("yet")),
+                        cursor.getFloat(cursor.getColumnIndexOrThrow("rating")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("thought"))
+                );
+                return book;
             }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
         }
-        return book;
+        return null;
     }
 
     private void saveChanges() {

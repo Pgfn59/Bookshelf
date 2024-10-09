@@ -137,7 +137,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
                 Book selectedBook = books.get(position1);
                 CalendarBookDetailFragment detailFragment = new CalendarBookDetailFragment();
                 Bundle args = new Bundle();
-                args.putInt("BOOK_ID", selectedBook.id);
+                args.putInt("BOOK_ID", selectedBook.getId());
                 detailFragment.setArguments(args);
                 detailFragment.show(getChildFragmentManager(), "CalendarBookDetailFragment");
             });
@@ -156,25 +156,17 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         String[] selectionArgs = {dateString};
 
         try (Cursor cursor = db.query("books", columns, selection, selectionArgs, null, null, null)){
-            int idColumnIndex = cursor.getColumnIndexOrThrow("id");
-            int imageColumnIndex = cursor.getColumnIndexOrThrow("image");
-            int titleColumnIndex = cursor.getColumnIndexOrThrow("title");
-            int authorColumnIndex = cursor.getColumnIndexOrThrow("author");
-            int dateColumnIndex = cursor.getColumnIndexOrThrow("date");
-            int yetColumnIndex = cursor.getColumnIndexOrThrow("yet");
-            int ratingColumnIndex = cursor.getColumnIndexOrThrow("rating");
-            int thoughtColumnIndex = cursor.getColumnIndexOrThrow("thought");
-
             while (cursor.moveToNext()) {
-                Book book = new Book();
-                book.id = cursor.getInt(idColumnIndex);
-                book.image = cursor.getString(imageColumnIndex);
-                book.title = cursor.getString(titleColumnIndex);
-                book.author = cursor.getString(authorColumnIndex);
-                book.date = cursor.getString(dateColumnIndex);
-                book.yet = cursor.getInt(yetColumnIndex);
-                book.rating = cursor.getFloat(ratingColumnIndex);
-                book.thought = cursor.getString(thoughtColumnIndex);
+                Book book = new Book(
+                        cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("image")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("title")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("author")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("date")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("yet")),
+                        cursor.getFloat(cursor.getColumnIndexOrThrow("rating")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("thought"))
+                );
                 bookList.add(book);
             }
         } finally {

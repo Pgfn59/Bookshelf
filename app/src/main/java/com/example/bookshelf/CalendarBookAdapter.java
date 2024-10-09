@@ -27,8 +27,8 @@ public class CalendarBookAdapter extends ArrayAdapter<Book> {
         TextView titleTextView = convertView.findViewById(R.id.bookTitleTextView);
         TextView authorTextView = convertView.findViewById(R.id.bookAuthorTextView);
 
-        titleTextView.setText(book.title);
-        authorTextView.setText(book.author);
+        titleTextView.setText(book.getTitle());
+        authorTextView.setText(book.getAuthor());
 
         return convertView;
     }
