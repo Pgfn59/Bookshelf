@@ -17,23 +17,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ShelfFavoriteFragment extends Fragment {
     private boolean isEditing = false;
     private Button bookButton;
     private Button itemButton;
     private Button editButton;
-    private List<Book> favoriteBookList1 = new ArrayList<>();
-    private List<Book> favoriteBookList2 = new ArrayList<>();
-    private List<Book> favoriteBookList3 = new ArrayList<>();
     private ShelfFavoriteAdapter shelfFavoriteAdapter1;
     private ShelfFavoriteAdapter shelfFavoriteAdapter2;
     private ShelfFavoriteAdapter shelfFavoriteAdapter3;
     private RecyclerView favoriteBookRecyclerView1;
     private RecyclerView favoriteBookRecyclerView2;
     private RecyclerView favoriteBookRecyclerView3;
-    private List<Book> bookList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,9 +45,9 @@ public class ShelfFavoriteFragment extends Fragment {
         favoriteBookRecyclerView1 = view.findViewById(R.id.favorite_shelfLayout1);
         favoriteBookRecyclerView2 = view.findViewById(R.id.favorite_shelfLayout2);
         favoriteBookRecyclerView3 = view.findViewById(R.id.favorite_shelfLayout3);
-        shelfFavoriteAdapter1 = new ShelfFavoriteAdapter(favoriteBookList1, requireContext());
-        shelfFavoriteAdapter2 = new ShelfFavoriteAdapter(favoriteBookList2, requireContext());
-        shelfFavoriteAdapter3 = new ShelfFavoriteAdapter(favoriteBookList3, requireContext());
+        shelfFavoriteAdapter1 = new ShelfFavoriteAdapter(new ArrayList<>(), requireContext());
+        shelfFavoriteAdapter2 = new ShelfFavoriteAdapter(new ArrayList<>(), requireContext());
+        shelfFavoriteAdapter3 = new ShelfFavoriteAdapter(new ArrayList<>(), requireContext());
         favoriteBookRecyclerView1.setAdapter(shelfFavoriteAdapter1);
         favoriteBookRecyclerView2.setAdapter(shelfFavoriteAdapter2);
         favoriteBookRecyclerView3.setAdapter(shelfFavoriteAdapter3);
@@ -98,6 +93,16 @@ public class ShelfFavoriteFragment extends Fragment {
                 }
             }
         });
+
+        getChildFragmentManager().setFragmentResultListener("requestItemKey", getViewLifecycleOwner(), (requestKey, result) -> {
+            int selectedItemId = result.getInt("selectedItemId");
+            if (selectedItemId != -1 && isEditing) {
+                Item selectedItem = getItemFromDatabase(selectedItemId);
+                if (selectedItem != null) {
+                    addItemToShelf(selectedItem);
+                }
+            }
+        });
     }
 
     private Book getBookFromDatabase(int bookId) {
@@ -113,6 +118,24 @@ public class ShelfFavoriteFragment extends Fragment {
         return book;
     }
 
+    private Item getItemFromDatabase(int itemId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query("items", new String[]{"id", "image", "name"}, "id = ?", new String[]{String.valueOf(itemId)}, null, null, null);
+
+        Item item = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            item = new Item();
+            item.id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+            item.image = cursor.getInt(cursor.getColumnIndexOrThrow("image"));
+            item.name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            cursor.close();
+        }
+
+        db.close();
+        return item;
+    }
+
     private void addBookToShelf(Book book) {
         final int bookWidth = getResources().getDimensionPixelSize(R.dimen.book_width);
         int freeSpace1 = getRecyclerViewFreeSpace(favoriteBookRecyclerView1);
@@ -120,14 +143,28 @@ public class ShelfFavoriteFragment extends Fragment {
         int freeSpace3 = getRecyclerViewFreeSpace(favoriteBookRecyclerView3);
 
         if (freeSpace1 >= bookWidth) {
-            favoriteBookList1.add(book);
-            shelfFavoriteAdapter1.notifyItemInserted(favoriteBookList1.size() - 1);
+            shelfFavoriteAdapter1.addItem(book);
         } else if (freeSpace2 >= bookWidth) {
-            favoriteBookList2.add(book);
-            shelfFavoriteAdapter2.notifyItemInserted(favoriteBookList2.size() - 1);
+            shelfFavoriteAdapter2.addItem(book);
         } else if (freeSpace3 >= bookWidth) {
-            favoriteBookList3.add(book);
-            shelfFavoriteAdapter3.notifyItemInserted(favoriteBookList3.size() - 1);
+            shelfFavoriteAdapter3.addItem(book);
+        } else {
+            Toast.makeText(requireContext(), "これ以上並べることはできません", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void addItemToShelf(Item item) {
+        final int itemWidth = getResources().getDimensionPixelSize(R.dimen.item_width);
+        int freeSpace1 = getRecyclerViewFreeSpace(favoriteBookRecyclerView1);
+        int freeSpace2 = getRecyclerViewFreeSpace(favoriteBookRecyclerView2);
+        int freeSpace3 = getRecyclerViewFreeSpace(favoriteBookRecyclerView3);
+
+        if (freeSpace1 >= itemWidth) {
+            shelfFavoriteAdapter1.addItem(item);
+        } else if (freeSpace2 >= itemWidth) {
+            shelfFavoriteAdapter2.addItem(item);
+        } else if (freeSpace3 >= itemWidth) {
+            shelfFavoriteAdapter3.addItem(item);
         } else {
             Toast.makeText(requireContext(), "これ以上並べることはできません", Toast.LENGTH_SHORT).show();
         }

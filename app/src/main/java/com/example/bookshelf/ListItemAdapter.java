@@ -1,5 +1,7 @@
 package com.example.bookshelf;
 
+import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,13 +41,31 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ItemVi
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = itemList.get(position);
-        if (item.get == 0) {
-            holder.itemImageView.setImageResource(R.drawable.question_mark);
-        } else {
-            holder.itemImageView.setImageResource(item.image);
+        holder.itemImageView.setImageResource(R.drawable.question_mark);
+
+        if (item.get == 1) {
+            if (isValidResource(holder, item.image)) {
+                holder.itemImageView.setImageResource(item.image);
+            } else {
+                Log.e("ListItemAdapter", "Invalid resource ID for item: " + item.name);
+            }
         }
+
         holder.itemNameView.setText(item.name);
         holder.itemGetView.setText(item.get == 0 ? "未入手" : "入手済");
+    }
+
+    private boolean isValidResource(ItemViewHolder holder, int resourceId) {
+        try {
+            getResources(holder).getResourceName(resourceId);
+            return true;
+        } catch (Resources.NotFoundException e) {
+            return false;
+        }
+    }
+
+    private Resources getResources(ItemViewHolder holder) {
+        return holder.itemView.getContext().getResources();
     }
 
     @Override

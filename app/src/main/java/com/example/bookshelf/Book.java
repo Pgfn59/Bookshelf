@@ -33,6 +33,12 @@ public class Book {
         this.author = author;
     }
 
+    public enum ItemType {
+        BOOK, ITEM
+    }
+
+    public ItemType itemType = ItemType.BOOK;
+
     public int getId() {
         return id;
     }
