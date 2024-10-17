@@ -1,5 +1,6 @@
 package com.example.bookshelf;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -17,8 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ShelfFavoriteFragment extends Fragment {
+    private DatabaseHelper dbHelper;
     private boolean isEditing = false;
     private Button bookButton;
     private Button itemButton;
@@ -60,6 +63,9 @@ public class ShelfFavoriteFragment extends Fragment {
         itemTouchHelper2.attachToRecyclerView(favoriteBookRecyclerView2);
         ItemTouchHelper itemTouchHelper3 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter3));
         itemTouchHelper3.attachToRecyclerView(favoriteBookRecyclerView3);
+        dbHelper = new DatabaseHelper(requireContext());
+        List<Object> items = loadShelf();
+        distributeItemsToAdapters(items);
 
         editButton.setOnClickListener(v -> {
             isEditing = !isEditing;
@@ -71,6 +77,10 @@ public class ShelfFavoriteFragment extends Fragment {
                 editButton.setText(R.string.btn_edit);
                 bookButton.setVisibility(View.GONE);
                 itemButton.setVisibility(View.GONE);
+                items.addAll(shelfFavoriteAdapter1.getItems());
+                items.addAll(shelfFavoriteAdapter2.getItems());
+                items.addAll(shelfFavoriteAdapter3.getItems());
+                saveShelf(items);
             }
         });
 
@@ -126,9 +136,9 @@ public class ShelfFavoriteFragment extends Fragment {
         Item item = null;
         if (cursor != null && cursor.moveToFirst()) {
             item = new Item();
-            item.id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-            item.image = cursor.getInt(cursor.getColumnIndexOrThrow("image"));
-            item.name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            item.setId(cursor.getInt(cursor.getColumnIndexOrThrow("id")));
+            item.setImage(cursor.getInt(cursor.getColumnIndexOrThrow("image")));
+            item.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
             cursor.close();
         }
 
@@ -184,5 +194,117 @@ public class ShelfFavoriteFragment extends Fragment {
             }
         }
         return 0;
+    }
+
+    public void saveShelf(List<Object> items) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        db.delete("shelf", null, null);
+
+        for (int i = 0; i < items.size(); i++) {
+            Object item = items.get(i);
+            ContentValues values = new ContentValues();
+
+            if (item instanceof Book) {
+                values.put("book_id", ((Book) item).getId());
+                values.put("type", 0);
+            } else if (item instanceof Item) {
+                values.put("item_id", ((Item) item).getId());
+                values.put("type", 1);
+            }
+
+            int shelfPosition = 0;
+            if (shelfFavoriteAdapter1.getItems().contains(item)) {
+                shelfPosition = 0;
+            } else if (shelfFavoriteAdapter2.getItems().contains(item)) {
+                shelfPosition = 1;
+            } else if (shelfFavoriteAdapter3.getItems().contains(item)) {
+                shelfPosition = 2;
+            }
+            values.put("shelf_position", shelfPosition);
+
+            db.insert("shelf", null, values);
+        }
+
+        db.close();
+    }
+
+    public List<Object> loadShelf() {
+        List<Object> items = new ArrayList<>();
+        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
+             Cursor cursor = db.rawQuery("SELECT * FROM shelf ORDER BY shelf_position", null)) {
+
+            while (cursor.moveToNext()) {
+                int bookId = cursor.getInt(cursor.getColumnIndexOrThrow("book_id"));
+                int itemId = cursor.getInt(cursor.getColumnIndexOrThrow("item_id"));
+
+                if (bookId != 0) {
+                    Book book = getBookFromDatabase(bookId);
+                    if (book != null) {
+                        items.add(book);
+                    }
+                } else {
+                    Item item = getItemFromDatabase(itemId);
+                    if (item != null) {
+                        items.add(item);
+                    }
+                }
+            }
+        }
+        return items;
+    }
+
+    private void distributeItemsToAdapters(List<Object> items) {
+        shelfFavoriteAdapter1.setDataList(new ArrayList<>());
+        shelfFavoriteAdapter2.setDataList(new ArrayList<>());
+        shelfFavoriteAdapter3.setDataList(new ArrayList<>());
+
+        for (Object item : items) {
+            if (!(item instanceof Book || item instanceof Item)) {
+                continue;
+            }
+
+            int shelfPosition = getShelfPosition(item);
+
+            switch (shelfPosition) {
+                case 0:
+                    shelfFavoriteAdapter1.addItem(item);
+                    break;
+                case 1:
+                    shelfFavoriteAdapter2.addItem(item);
+                    break;
+                case 2:
+                    shelfFavoriteAdapter3.addItem(item);
+                    break;
+            }
+        }
+    }
+
+    private int getShelfPosition(Object item) {
+        int shelfPosition = 0;
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String[] columns = {"shelf_position"};
+        String selection = "book_id = ? OR item_id = ?";
+        String[] selectionArgs;
+
+        if (item instanceof Book) {
+            selectionArgs = new String[]{String.valueOf(((Book) item).getId()), "0"};
+        } else if (item instanceof Item) {
+            selectionArgs = new String[]{"0", String.valueOf(((Item) item).getId())};
+        } else {
+            return shelfPosition;
+        }
+
+        Cursor cursor = db.query("shelf", columns, selection, selectionArgs, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            shelfPosition = cursor.getInt(cursor.getColumnIndexOrThrow("shelf_position"));
+            cursor.close();
+        }
+
+        db.close();
+
+        return shelfPosition;
     }
 }

@@ -43,16 +43,16 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.ItemVi
         Item item = itemList.get(position);
         holder.itemImageView.setImageResource(R.drawable.question_mark);
 
-        if (item.get == 1) {
-            if (isValidResource(holder, item.image)) {
-                holder.itemImageView.setImageResource(item.image);
+        if (item.getGet() == 1) {
+            if (isValidResource(holder, item.getImage())) {
+                holder.itemImageView.setImageResource(item.getImage());
             } else {
-                Log.e("ListItemAdapter", "Invalid resource ID for item: " + item.name);
+                Log.e("ListItemAdapter", "Invalid resource ID for item: " + item.getName());
             }
         }
 
-        holder.itemNameView.setText(item.name);
-        holder.itemGetView.setText(item.get == 0 ? "未入手" : "入手済");
+        holder.itemNameView.setText(item.getName());
+        holder.itemGetView.setText(item.getGet() == 0 ? "未入手" : "入手済");
     }
 
     private boolean isValidResource(ItemViewHolder holder, int resourceId) {

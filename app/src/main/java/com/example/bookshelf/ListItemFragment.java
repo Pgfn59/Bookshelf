@@ -46,10 +46,10 @@ public class ListItemFragment extends Fragment {
 
             while (cursor.moveToNext()) {
                 Item item = new Item();
-                item.id = cursor.getInt(0);
-                item.image = cursor.getInt(1);
-                item.name = cursor.getString(2);
-                item.get = cursor.getInt(3);
+                item.setId(cursor.getInt(0));
+                item.setImage(cursor.getInt(1));
+                item.setName(cursor.getString(2));
+                item.setGet(cursor.getInt(3));
                 itemList.add(item);
             }
         } finally {

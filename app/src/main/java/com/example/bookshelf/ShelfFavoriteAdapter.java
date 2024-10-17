@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,16 +29,20 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
     private static final int VIEW_TYPE_BOOK = 0;
     private static final int VIEW_TYPE_ITEM = 1;
     private final List<Object> dataList;
+    private final List<Object> items = new ArrayList<>();
     private final Context context;
     private final DisplayMetrics displayMetrics;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public ShelfFavoriteAdapter(List<Object> dataList, Context context) {
         this.dataList = dataList;
+        this.items.addAll(dataList);
         this.context = context;
         this.displayMetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
     }
+
+    public List<Object> getItems() { return items; }
 
     public static class BookViewHolder extends RecyclerView.ViewHolder {
         public ImageView imageView;
@@ -66,6 +71,7 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
 
     public void addItem(Object item) {
         dataList.add(item);
+        items.add(item);
         notifyDataSetChanged();
     }
 
@@ -170,7 +176,7 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
             }
         } else if (data instanceof Item) {
             Item item = (Item) data;
-            Glide.with(context).load(item.image).into(holder.imageView);
+            Glide.with(context).load(item.getImage()).into(holder.imageView);
         }
     }
 
@@ -196,12 +202,20 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
                 Collections.swap(dataList, i, i + 1);
+                Collections.swap(items, i, i + 1);
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
                 Collections.swap(dataList, i, i - 1);
+                Collections.swap(items, i, i - 1);
             }
         }
         notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public void setDataList(List<Object> dataList) {
+        this.dataList.clear();
+        this.dataList.addAll(dataList);
+        notifyDataSetChanged();
     }
 }

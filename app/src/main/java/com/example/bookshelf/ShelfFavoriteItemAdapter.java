@@ -43,8 +43,8 @@ public class ShelfFavoriteItemAdapter extends RecyclerView.Adapter<ShelfFavorite
     @Override
     public void onBindViewHolder(@NonNull ShelfFavoriteItemAdapter.ItemViewHolder holder, int position) {
         Item item = itemList.get(position);
-        holder.itemImageView.setImageResource(item.image);
-        holder.itemNameView.setText(item.name);
+        holder.itemImageView.setImageResource(item.getImage());
+        holder.itemNameView.setText(item.getName());
 
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) {
