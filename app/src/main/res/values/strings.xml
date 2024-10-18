@@ -25,15 +25,16 @@
     <string name="back">&lt;</string>
     <string name="forward">&gt;</string>
     <string name="btn_edit">編集</string>
-    <string name="duration">累積読了書籍数：</string>
+    <string name="duration">今までに読んだ本：</string>
     <string name="edit_user_name">ユーザー名を入力</string>
     <string name="item_name">アイテム名</string>
     <string name="item_num">未入手</string>
-    <string name="duration_month">当月読了書籍数：</string>
+    <string name="duration_month">今月読んだ本：</string>
     <string name="btn_favorite">お気に入り</string>
     <string name="btn_book">本</string>
     <string name="btn_item">小物</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_bonus_message">ログインボーナス %1$s を獲得しました</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

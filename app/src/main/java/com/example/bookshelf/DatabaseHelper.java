@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     static final private String DB_NAME = "books_database.db";
-    static final private int VERSION = 20;
+    static final private int VERSION = 21;
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, VERSION);
@@ -36,6 +36,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "book_id INTEGER,"
                 + "item_id INTEGER,"
                 + "shelf_position INTEGER)");
+
+        db.execSQL("CREATE TABLE login("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "last_login_date INTEGER,"
+                + "bonus_item_id INTEGER)");
 
         db.execSQL("INSERT INTO items (image, name, get)"
                 + "VALUES(" + R.drawable.filebox +",'FILEボックス',0)");
@@ -111,6 +116,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS books");
         db.execSQL("DROP TABLE IF EXISTS items");
         db.execSQL("DROP TABLE IF EXISTS shelf");
+        db.execSQL("DROP TABLE IF EXISTS login"); //後で消す
         onCreate(db);
     }
 

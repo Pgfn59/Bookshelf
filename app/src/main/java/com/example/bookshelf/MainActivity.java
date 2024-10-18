@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String userName = sharedPreferences.getString("user_name", "");
         editUserName.setText(userName);
+        giveLoginBonus();
 
         editUserName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -201,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         previousTotalFinishedBookCount = finishedBookCountTotal;
         previousMonthFinishedBookCount = finishedBookCountMonth;
 
-        String durationText = "累積読了書籍数：" + finishedBookCountTotal + "冊";
-        String durationTextMonth = "当月読了書籍数：" + finishedBookCountMonth + "冊";
+        String durationText = "今までに読んだ本：" + finishedBookCountTotal + "冊";
+        String durationTextMonth = "今月読んだ本：" + finishedBookCountMonth + "冊";
         textDuration.setText(durationText);
         textDurationMonth.setText(durationTextMonth);
     }
@@ -269,5 +271,82 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         }
         cursorMonth.close();
         return finishedBookCountMonth;
+    }
+
+    //ログインボーナス
+    private void giveLoginBonus() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        long lastLoginDate = getLastLoginDate(db);
+        long todayDate = System.currentTimeMillis() / (24 * 60 * 60 * 1000);
+
+        if (lastLoginDate != todayDate) {
+            int bonusItemId = getRandomItemId();
+            updateLoginBonus(db, todayDate, bonusItemId);
+            addItemToUser(bonusItemId);
+            String itemName = getItemName(bonusItemId);
+            String message = getString(R.string.login_bonus_message, itemName);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+
+        db.close();
+    }
+
+    private long getLastLoginDate(SQLiteDatabase db) {
+        long lastLoginDate = 0;
+
+        try (Cursor cursor = db.query("login", new String[]{"last_login_date"}, null, null, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                lastLoginDate = cursor.getLong(cursor.getColumnIndexOrThrow("last_login_date"));
+            }
+        }
+
+        return lastLoginDate;
+    }
+
+    private int getRandomItemId() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        int itemId = 0;
+
+        try (Cursor cursor = db.query("items", new String[]{"id"}, "get = 0", null, null, null, "RANDOM()", "1")) {
+            if (cursor.moveToFirst()) {
+                itemId = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+            }
+        }
+
+        db.close();
+        return itemId;
+    }
+
+    private String getItemName(int itemId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String itemName = "";
+
+        try (Cursor cursor = db.query("items", new String[]{"name"}, "id = ?", new String[]{String.valueOf(itemId)}, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                itemName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            }
+        }
+
+        db.close();
+        return itemName;
+    }
+
+    private void updateLoginBonus(SQLiteDatabase db, long lastLoginDate, int bonusItemId) {
+        ContentValues values = new ContentValues();
+        values.put("last_login_date", lastLoginDate);
+        values.put("bonus_item_id", bonusItemId);
+        int rowsAffected = db.update("login", values, "id = ?", new String[]{String.valueOf(1)});
+        if (rowsAffected == 0) {
+            db.insert("login", null, values);
+        }
+    }
+
+    private void addItemToUser(int itemId) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("get", 1);
+        db.update("items", values, "id = ?", new String[]{String.valueOf(itemId)});
+        db.close();
     }
 }
