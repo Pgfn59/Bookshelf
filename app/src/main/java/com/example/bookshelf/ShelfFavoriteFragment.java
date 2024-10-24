@@ -1,6 +1,8 @@
 package com.example.bookshelf;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -72,8 +74,29 @@ public class ShelfFavoriteFragment extends Fragment {
         shelfFavoriteAdapter2.notifyDataSetChanged();
         shelfFavoriteAdapter3.notifyDataSetChanged();
 
+        shelfFavoriteAdapter1.setOnItemClickListener(position -> {
+            if (isEditing) {
+                showDeleteConfirmationDialog(position, shelfFavoriteAdapter1);
+            }
+        });
+
+        shelfFavoriteAdapter2.setOnItemClickListener(position -> {
+            if (isEditing) {
+                showDeleteConfirmationDialog(position, shelfFavoriteAdapter2);
+            }
+        });
+
+        shelfFavoriteAdapter3.setOnItemClickListener(position -> {
+            if (isEditing) {
+                showDeleteConfirmationDialog(position, shelfFavoriteAdapter3);
+            }
+        });
+
         editButton.setOnClickListener(v -> {
             isEditing = !isEditing;
+            shelfFavoriteAdapter1.setEditing(isEditing);
+            shelfFavoriteAdapter2.setEditing(isEditing);
+            shelfFavoriteAdapter3.setEditing(isEditing);
             if (isEditing) {
                 editButton.setText("保存");
                 bookButton.setVisibility(View.VISIBLE);
@@ -86,7 +109,11 @@ public class ShelfFavoriteFragment extends Fragment {
                 items.addAll(shelfFavoriteAdapter1.getItems());
                 items.addAll(shelfFavoriteAdapter2.getItems());
                 items.addAll(shelfFavoriteAdapter3.getItems());
-                saveShelf(items);
+                List<Object> dataList = new ArrayList<>();
+                dataList.addAll(shelfFavoriteAdapter1.getDataList());
+                dataList.addAll(shelfFavoriteAdapter2.getDataList());
+                dataList.addAll(shelfFavoriteAdapter3.getDataList());
+                saveShelf(dataList);
             }
         });
 
@@ -206,8 +233,12 @@ public class ShelfFavoriteFragment extends Fragment {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         db.delete("shelf", null, null);
+        List<Object> dataList = new ArrayList<>();
+        dataList.addAll(shelfFavoriteAdapter1.getDataList());
+        dataList.addAll(shelfFavoriteAdapter2.getDataList());
+        dataList.addAll(shelfFavoriteAdapter3.getDataList());
 
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < dataList.size(); i++) {
             Object item = items.get(i);
             ContentValues values = new ContentValues();
 
@@ -219,7 +250,7 @@ public class ShelfFavoriteFragment extends Fragment {
                 values.put("type", 1);
             }
 
-            int shelfPosition = getShelfPositionFromItems(item, items);
+            int shelfPosition = getShelfPositionFromItems(item, dataList);
             values.put("shelf_position", shelfPosition);
 
             db.insert("shelf", null, values);
@@ -229,7 +260,11 @@ public class ShelfFavoriteFragment extends Fragment {
     }
 
     private int getShelfPositionFromItems(Object item, List<Object> items) {
-        int index = items.indexOf(item);
+        List<Object> dataList = new ArrayList<>();
+        dataList.addAll(shelfFavoriteAdapter1.getDataList());
+        dataList.addAll(shelfFavoriteAdapter2.getDataList());
+        dataList.addAll(shelfFavoriteAdapter3.getDataList());
+        int index = dataList.indexOf(item);
         if (index < shelfFavoriteAdapter1.getItemCount()) {
             return 0;
         } else if (index < shelfFavoriteAdapter1.getItemCount() + shelfFavoriteAdapter2.getItemCount()) {
@@ -318,5 +353,13 @@ public class ShelfFavoriteFragment extends Fragment {
         db.close();
 
         return shelfPosition;
+    }
+
+    private void showDeleteConfirmationDialog(int position, ShelfFavoriteAdapter adapter) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setMessage("このアイテムを削除しますか？");
+        builder.setPositiveButton("削除", (dialog, which) -> adapter.removeItemAt(position));
+        builder.setNegativeButton("キャンセル", null);
+        builder.show();
     }
 }

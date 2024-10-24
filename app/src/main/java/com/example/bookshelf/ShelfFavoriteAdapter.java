@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -29,10 +28,27 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
     private static final int VIEW_TYPE_BOOK = 0;
     private static final int VIEW_TYPE_ITEM = 1;
     private final List<Object> dataList;
+    public List<Object> getDataList() {
+        return dataList;
+    }
     private final List<Object> items = new ArrayList<>();
     private final Context context;
     private final DisplayMetrics displayMetrics;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private OnItemClickListener itemClickListener;
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+    private boolean isEditing;
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.itemClickListener = listener;
+    }
+
+    public void setEditing(boolean editing) {
+        isEditing = editing;
+        notifyDataSetChanged();
+    }
 
     public ShelfFavoriteAdapter(List<Object> dataList, Context context) {
         this.dataList = dataList;
@@ -73,6 +89,12 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
         dataList.add(item);
         items.add(item);
         notifyDataSetChanged();
+    }
+
+    public Object removeItemAt(int position) {
+        Object removedItem = dataList.remove(position);
+        notifyItemRemoved(position);
+        return removedItem;
     }
 
     @NonNull
@@ -137,6 +159,12 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
     @Override
     public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
         Object data = dataList.get(position);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (isEditing && itemClickListener != null) {
+                itemClickListener.onItemClick(position);
+            }
+        });
 
         if (data instanceof Book) {
             Book book = (Book) data;
