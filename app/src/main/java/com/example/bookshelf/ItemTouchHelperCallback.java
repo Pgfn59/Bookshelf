@@ -4,11 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     private final ShelfFavoriteAdapter adapter;
+    private List<Object> items;
 
-    public ItemTouchHelperCallback(ShelfFavoriteAdapter adapter) {
+    public ItemTouchHelperCallback(ShelfFavoriteAdapter adapter, List<Object> items) {
         this.adapter = adapter;
+        this.items = items;
     }
 
     @Override
@@ -20,17 +24,15 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        int fromPosition = viewHolder.getAdapterPosition();
+        int toPosition = target.getAdapterPosition();
+
+        adapter.onItemMove(fromPosition, toPosition);
         return true;
     }
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
-    }
-
-    @Override
-    public boolean isLongPressDragEnabled() {
-        return true;
     }
 }

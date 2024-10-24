@@ -178,35 +178,38 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
     }
 
     public void displayDuration() {
-        String queryTotal = "SELECT COUNT(*) FROM books WHERE yet = 0";
-        Cursor cursorTotal = db.rawQuery(queryTotal, null);
         int finishedBookCountTotal = 0;
-        if (cursorTotal.moveToFirst()) {
-            finishedBookCountTotal = cursorTotal.getInt(0);
-        }
-        cursorTotal.close();
-
-        String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
-        String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
-        Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth});
         int finishedBookCountMonth = 0;
-        if (cursorMonth.moveToFirst()) {
-            finishedBookCountMonth = cursorMonth.getInt(0);
+        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
+             Cursor cursorTotal = db.rawQuery("SELECT COUNT(*) FROM books WHERE yet = 0", null)) {
+            if (cursorTotal.moveToFirst()) {
+                finishedBookCountTotal = cursorTotal.getInt(0);
+            }
+            cursorTotal.close();
+
+            String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
+            String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
+            try (Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth})) {
+                if (cursorMonth.moveToFirst()) {
+                    finishedBookCountMonth = cursorMonth.getInt(0);
+                }
+            }
+
+            int monthDiff = finishedBookCountMonth - previousMonthFinishedBookCount;
+            if (finishedBookCountTotal > previousTotalFinishedBookCount || monthDiff > 0) {
+                updateItemStatus(finishedBookCountTotal, monthDiff);
+            }
+
+            previousTotalFinishedBookCount = finishedBookCountTotal;
+            previousMonthFinishedBookCount = finishedBookCountMonth;
+
+            String durationText = "今までに読んだ本：" + finishedBookCountTotal + "冊";
+            String durationTextMonth = "今月読んだ本：" + finishedBookCountMonth + "冊";
+            textDuration.setText(durationText);
+            textDurationMonth.setText(durationTextMonth);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        cursorMonth.close();
-
-        int monthDiff = finishedBookCountMonth - previousMonthFinishedBookCount;
-        if (finishedBookCountTotal > previousTotalFinishedBookCount || monthDiff > 0) {
-            updateItemStatus(finishedBookCountTotal, monthDiff);
-        }
-
-        previousTotalFinishedBookCount = finishedBookCountTotal;
-        previousMonthFinishedBookCount = finishedBookCountMonth;
-
-        String durationText = "今までに読んだ本：" + finishedBookCountTotal + "冊";
-        String durationTextMonth = "今月読んだ本：" + finishedBookCountMonth + "冊";
-        textDuration.setText(durationText);
-        textDurationMonth.setText(durationTextMonth);
     }
 
     @Override

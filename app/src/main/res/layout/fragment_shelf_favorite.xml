@@ -78,6 +78,7 @@
                 android:layout_weight="1"
                 android:background="@color/shelf"
                 android:text="@string/btn_book"
+                android:textColor="@color/white"
                 android:visibility="gone" />
 
             <Button
@@ -86,7 +87,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/shelf"
-                android:text="@string/btn_edit" />
+                android:text="@string/btn_edit"
+                android:textColor="@color/white"/>
 
             <Button
                 android:id="@+id/favorite_btn_item"
@@ -95,6 +97,7 @@
                 android:layout_weight="1"
                 android:background="@color/shelf"
                 android:text="@string/btn_item"
+                android:textColor="@color/white"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

@@ -35,7 +35,10 @@ public class ShelfFavoriteFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_shelf_favorite, container, false);
+        View view = inflater.inflate(R.layout.fragment_shelf_favorite, container, false);
+        dbHelper = new DatabaseHelper(requireContext());
+
+        return view;
     }
 
     @Override
@@ -57,15 +60,17 @@ public class ShelfFavoriteFragment extends Fragment {
         favoriteBookRecyclerView1.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         favoriteBookRecyclerView2.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         favoriteBookRecyclerView3.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        ItemTouchHelper itemTouchHelper1 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter1));
-        itemTouchHelper1.attachToRecyclerView(favoriteBookRecyclerView1);
-        ItemTouchHelper itemTouchHelper2 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter2));
-        itemTouchHelper2.attachToRecyclerView(favoriteBookRecyclerView2);
-        ItemTouchHelper itemTouchHelper3 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter3));
-        itemTouchHelper3.attachToRecyclerView(favoriteBookRecyclerView3);
-        dbHelper = new DatabaseHelper(requireContext());
         List<Object> items = loadShelf();
         distributeItemsToAdapters(items);
+        ItemTouchHelper itemTouchHelper1 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter1, items));
+        itemTouchHelper1.attachToRecyclerView(favoriteBookRecyclerView1);
+        ItemTouchHelper itemTouchHelper2 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter2, items));
+        itemTouchHelper2.attachToRecyclerView(favoriteBookRecyclerView2);
+        ItemTouchHelper itemTouchHelper3 = new ItemTouchHelper(new ItemTouchHelperCallback(shelfFavoriteAdapter3, items));
+        itemTouchHelper3.attachToRecyclerView(favoriteBookRecyclerView3);
+        shelfFavoriteAdapter1.notifyDataSetChanged();
+        shelfFavoriteAdapter2.notifyDataSetChanged();
+        shelfFavoriteAdapter3.notifyDataSetChanged();
 
         editButton.setOnClickListener(v -> {
             isEditing = !isEditing;
@@ -77,6 +82,7 @@ public class ShelfFavoriteFragment extends Fragment {
                 editButton.setText(R.string.btn_edit);
                 bookButton.setVisibility(View.GONE);
                 itemButton.setVisibility(View.GONE);
+                items.clear();
                 items.addAll(shelfFavoriteAdapter1.getItems());
                 items.addAll(shelfFavoriteAdapter2.getItems());
                 items.addAll(shelfFavoriteAdapter3.getItems());
@@ -213,20 +219,26 @@ public class ShelfFavoriteFragment extends Fragment {
                 values.put("type", 1);
             }
 
-            int shelfPosition = 0;
-            if (shelfFavoriteAdapter1.getItems().contains(item)) {
-                shelfPosition = 0;
-            } else if (shelfFavoriteAdapter2.getItems().contains(item)) {
-                shelfPosition = 1;
-            } else if (shelfFavoriteAdapter3.getItems().contains(item)) {
-                shelfPosition = 2;
-            }
+            int shelfPosition = getShelfPositionFromItems(item, items);
             values.put("shelf_position", shelfPosition);
 
             db.insert("shelf", null, values);
         }
 
         db.close();
+    }
+
+    private int getShelfPositionFromItems(Object item, List<Object> items) {
+        int index = items.indexOf(item);
+        if (index < shelfFavoriteAdapter1.getItemCount()) {
+            return 0;
+        } else if (index < shelfFavoriteAdapter1.getItemCount() + shelfFavoriteAdapter2.getItemCount()) {
+            return 1;
+        } else if (index < shelfFavoriteAdapter1.getItemCount() + shelfFavoriteAdapter2.getItemCount() + shelfFavoriteAdapter3.getItemCount()) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     public List<Object> loadShelf() {
