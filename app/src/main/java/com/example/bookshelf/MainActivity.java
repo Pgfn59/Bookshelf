@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String userName = sharedPreferences.getString("user_name", "");
         editUserName.setText(userName);
-        giveLoginBonus();
 
         editUserName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -178,38 +177,35 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
     }
 
     public void displayDuration() {
+        String queryTotal = "SELECT COUNT(*) FROM books WHERE yet = 0";
+        Cursor cursorTotal = db.rawQuery(queryTotal, null);
         int finishedBookCountTotal = 0;
-        int finishedBookCountMonth = 0;
-        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
-             Cursor cursorTotal = db.rawQuery("SELECT COUNT(*) FROM books WHERE yet = 0", null)) {
-            if (cursorTotal.moveToFirst()) {
-                finishedBookCountTotal = cursorTotal.getInt(0);
-            }
-            cursorTotal.close();
-
-            String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
-            String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
-            try (Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth})) {
-                if (cursorMonth.moveToFirst()) {
-                    finishedBookCountMonth = cursorMonth.getInt(0);
-                }
-            }
-
-            int monthDiff = finishedBookCountMonth - previousMonthFinishedBookCount;
-            if (finishedBookCountTotal > previousTotalFinishedBookCount || monthDiff > 0) {
-                updateItemStatus(finishedBookCountTotal, monthDiff);
-            }
-
-            previousTotalFinishedBookCount = finishedBookCountTotal;
-            previousMonthFinishedBookCount = finishedBookCountMonth;
-
-            String durationText = "今までに読んだ本：" + finishedBookCountTotal + "冊";
-            String durationTextMonth = "今月読んだ本：" + finishedBookCountMonth + "冊";
-            textDuration.setText(durationText);
-            textDurationMonth.setText(durationTextMonth);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (cursorTotal.moveToFirst()) {
+            finishedBookCountTotal = cursorTotal.getInt(0);
         }
+        cursorTotal.close();
+
+        String currentMonth = new SimpleDateFormat("yyyy/MM", Locale.getDefault()).format(new Date());
+        String queryMonth = "SELECT COUNT(*) FROM books WHERE yet = 0 AND SUBSTR(date, 1, 7) = ?";
+        Cursor cursorMonth = db.rawQuery(queryMonth, new String[]{currentMonth});
+        int finishedBookCountMonth = 0;
+        if (cursorMonth.moveToFirst()) {
+            finishedBookCountMonth = cursorMonth.getInt(0);
+        }
+        cursorMonth.close();
+
+        int monthDiff = finishedBookCountMonth - previousMonthFinishedBookCount;
+        if (finishedBookCountTotal > previousTotalFinishedBookCount || monthDiff > 0) {
+            updateItemStatus(finishedBookCountTotal, monthDiff);
+        }
+
+        previousTotalFinishedBookCount = finishedBookCountTotal;
+        previousMonthFinishedBookCount = finishedBookCountMonth;
+
+        String durationText = "今までに読んだ本：" + finishedBookCountTotal + "冊";
+        String durationTextMonth = "今月読んだ本：" + finishedBookCountMonth + "冊";
+        textDuration.setText(durationText);
+        textDurationMonth.setText(durationTextMonth);
     }
 
     @Override
@@ -274,82 +270,5 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
         }
         cursorMonth.close();
         return finishedBookCountMonth;
-    }
-
-    //ログインボーナス
-    private void giveLoginBonus() {
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        long lastLoginDate = getLastLoginDate(db);
-        long todayDate = System.currentTimeMillis() / (24 * 60 * 60 * 1000);
-
-        if (lastLoginDate != todayDate) {
-            int bonusItemId = getRandomItemId();
-            updateLoginBonus(db, todayDate, bonusItemId);
-            addItemToUser(bonusItemId);
-            String itemName = getItemName(bonusItemId);
-            String message = getString(R.string.login_bonus_message, itemName);
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        }
-
-        db.close();
-    }
-
-    private long getLastLoginDate(SQLiteDatabase db) {
-        long lastLoginDate = 0;
-
-        try (Cursor cursor = db.query("login", new String[]{"last_login_date"}, null, null, null, null, null)) {
-            if (cursor.moveToFirst()) {
-                lastLoginDate = cursor.getLong(cursor.getColumnIndexOrThrow("last_login_date"));
-            }
-        }
-
-        return lastLoginDate;
-    }
-
-    private int getRandomItemId() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        int itemId = 0;
-
-        try (Cursor cursor = db.query("items", new String[]{"id"}, "get = 0", null, null, null, "RANDOM()", "1")) {
-            if (cursor.moveToFirst()) {
-                itemId = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-            }
-        }
-
-        db.close();
-        return itemId;
-    }
-
-    private String getItemName(int itemId) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String itemName = "";
-
-        try (Cursor cursor = db.query("items", new String[]{"name"}, "id = ?", new String[]{String.valueOf(itemId)}, null, null, null)) {
-            if (cursor.moveToFirst()) {
-                itemName = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            }
-        }
-
-        db.close();
-        return itemName;
-    }
-
-    private void updateLoginBonus(SQLiteDatabase db, long lastLoginDate, int bonusItemId) {
-        ContentValues values = new ContentValues();
-        values.put("last_login_date", lastLoginDate);
-        values.put("bonus_item_id", bonusItemId);
-        int rowsAffected = db.update("login", values, "id = ?", new String[]{String.valueOf(1)});
-        if (rowsAffected == 0) {
-            db.insert("login", null, values);
-        }
-    }
-
-    private void addItemToUser(int itemId) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("get", 1);
-        db.update("items", values, "id = ?", new String[]{String.valueOf(itemId)});
-        db.close();
     }
 }
