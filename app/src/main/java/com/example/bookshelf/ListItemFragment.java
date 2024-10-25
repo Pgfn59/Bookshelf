@@ -58,6 +58,16 @@ public class ListItemFragment extends Fragment {
             }
             db.close();
         }
+
+        itemList.sort((item1, item2) -> {
+            if (item1.getGet() == 1 && item2.getGet() == 0) {
+                return -1;
+            } else if (item1.getGet() == 0 && item2.getGet() == 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
         return itemList;
     }
 

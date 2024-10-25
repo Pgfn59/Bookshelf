@@ -170,7 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS books");
         db.execSQL("DROP TABLE IF EXISTS items");
         db.execSQL("DROP TABLE IF EXISTS shelf");
-        db.execSQL("DROP TABLE IF EXISTS login"); //後で消す
+        db.execSQL("DROP TABLE IF EXISTS login");
         onCreate(db);
     }
 
