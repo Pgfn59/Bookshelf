@@ -88,7 +88,7 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
     public void addItem(Object item) {
         dataList.add(item);
         items.add(item);
-        notifyDataSetChanged();
+        notifyItemInserted(dataList.size() - 1);
     }
 
     public Object removeItemAt(int position) {
@@ -189,12 +189,16 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
                         int height = recyclerViewHeight - 50;
 
                         if (width > 0 && height > 0) {
-                            Bitmap spineBitmap = createSpineBitmap(book.getTitle(), width, height, context);
+                            Bitmap spineBitmap = createSpineBitmap(book.getTitle(), height, context);
 
                             handler.post(() -> {
                                 book.setSpineBitmap(spineBitmap);
                                 holder.imageView.setImageBitmap(spineBitmap);
                                 holder.imageView.setScaleType(ImageView.ScaleType.FIT_END);
+
+                                ViewGroup.LayoutParams layoutParams = holder.imageView.getLayoutParams();
+                                layoutParams.width = spineBitmap.getWidth();
+                                holder.imageView.setLayoutParams(layoutParams);
                             });
                         } else {
                             holder.imageView.post(this);
@@ -208,11 +212,13 @@ public class ShelfFavoriteAdapter extends RecyclerView.Adapter<ShelfFavoriteAdap
         }
     }
 
-    private Bitmap createSpineBitmap(String title, int width, int height, Context context) {
+    private Bitmap createSpineBitmap(String title, int height, Context context) {
         View spineView = LayoutInflater.from(context).inflate(R.layout.sub_shelf_book, null);
         TextView titleTextView = spineView.findViewById(R.id.title_vertical);
         titleTextView.setText(title);
 
+        titleTextView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+        int width = titleTextView.getMeasuredWidth() + spineView.getPaddingLeft() + spineView.getPaddingRight();
         spineView.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
         spineView.layout(0, 0, spineView.getMeasuredWidth(), spineView.getMeasuredHeight());
 
