@@ -108,7 +108,27 @@ public class ShelfFragment extends Fragment {
             bookView.setImageBitmap(bitmap);
             bookView.setScaleType(ImageView.ScaleType.FIT_END);
         }
+
+        bookView.setOnClickListener(v -> {
+            ListBookDetailFragment dialogFragment = new ListBookDetailFragment();
+            Bundle args = new Bundle();
+            int bookId = getBookIdFromImagePathOrTitle(imagePath, title);
+            args.putInt("BOOK_ID", bookId);
+            dialogFragment.setArguments(args);
+            dialogFragment.show(getParentFragmentManager(), "book_details");
+        });
+
         return bookView;
+    }
+
+    private int getBookIdFromImagePathOrTitle(String imagePath, String title) {
+        try (SQLiteDatabase db = dbHelper.getReadableDatabase();
+             Cursor cursor = db.query("books", new String[]{"id"}, "title = ?", new String[]{title}, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(0);
+            }
+        }
+        return -1;
     }
 
     private void addToCurrentRow(ImageView bookView) {
