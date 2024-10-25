@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements UpdateList {
             }
         });
 
+        displayDuration();
         buttonDrawerToggle.setOnClickListener(v -> drawerLayout.open());
 
         navigationView.setNavigationItemSelectedListener(item -> {
